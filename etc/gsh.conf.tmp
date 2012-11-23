@@ -1,0 +1,18 @@
+# GSH configuration file example
+daemonize no
+pidfile /var/run/redis.pid
+port 6522
+timeout 0
+loglevel verbose
+logfile stdout
+databases 16
+dir ./
+#activerehashing yes
+bind 127.0.0.1
+# syslog-enabled no
+# maxclients 128
+
+formula carsvm 
+formula sample
+formula bc 
+formula cache 

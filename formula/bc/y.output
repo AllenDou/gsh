@@ -1,0 +1,265 @@
+   0  $accept : calclist $end
+
+   1  calclist :
+   2           | calclist exp EOL
+   3           | calclist EOL
+
+   4  exp : factor
+   5      | exp ADD exp
+   6      | exp SUB factor
+   7      | exp ABS factor
+
+   8  factor : term
+   9         | factor MUL term
+  10         | factor DIV term
+
+  11  term : NUMBER
+  12       | ABS term
+  13       | OP exp CP
+
+state 0
+	$accept : . calclist $end  (0)
+	calclist : .  (1)
+
+	.  reduce 1
+
+	calclist  goto 1
+
+
+state 1
+	$accept : calclist . $end  (0)
+	calclist : calclist . exp EOL  (2)
+	calclist : calclist . EOL  (3)
+
+	$end  accept
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	EOL  shift 5
+	.  error
+
+	exp  goto 6
+	factor  goto 7
+	term  goto 8
+
+
+state 2
+	term : NUMBER .  (11)
+
+	.  reduce 11
+
+
+state 3
+	term : ABS . term  (12)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	term  goto 9
+
+
+state 4
+	term : OP . exp CP  (13)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	exp  goto 10
+	factor  goto 7
+	term  goto 8
+
+
+state 5
+	calclist : calclist EOL .  (3)
+
+	.  reduce 3
+
+
+state 6
+	calclist : calclist exp . EOL  (2)
+	exp : exp . ADD exp  (5)
+	exp : exp . SUB factor  (6)
+	exp : exp . ABS factor  (7)
+
+	ADD  shift 11
+	SUB  shift 12
+	ABS  shift 13
+	EOL  shift 14
+	.  error
+
+
+state 7
+	exp : factor .  (4)
+	factor : factor . MUL term  (9)
+	factor : factor . DIV term  (10)
+
+	MUL  shift 15
+	DIV  shift 16
+	ADD  reduce 4
+	SUB  reduce 4
+	ABS  reduce 4
+	CP  reduce 4
+	EOL  reduce 4
+
+
+state 8
+	factor : term .  (8)
+
+	.  reduce 8
+
+
+state 9
+	term : ABS term .  (12)
+
+	.  reduce 12
+
+
+state 10
+	exp : exp . ADD exp  (5)
+	exp : exp . SUB factor  (6)
+	exp : exp . ABS factor  (7)
+	term : OP exp . CP  (13)
+
+	ADD  shift 11
+	SUB  shift 12
+	ABS  shift 13
+	CP  shift 17
+	.  error
+
+
+state 11
+	exp : exp ADD . exp  (5)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	exp  goto 18
+	factor  goto 7
+	term  goto 8
+
+
+state 12
+	exp : exp SUB . factor  (6)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	factor  goto 19
+	term  goto 8
+
+
+state 13
+	exp : exp ABS . factor  (7)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	factor  goto 20
+	term  goto 8
+
+
+state 14
+	calclist : calclist exp EOL .  (2)
+
+	.  reduce 2
+
+
+state 15
+	factor : factor MUL . term  (9)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	term  goto 21
+
+
+state 16
+	factor : factor DIV . term  (10)
+
+	NUMBER  shift 2
+	ABS  shift 3
+	OP  shift 4
+	.  error
+
+	term  goto 22
+
+
+state 17
+	term : OP exp CP .  (13)
+
+	.  reduce 13
+
+
+18: shift/reduce conflict (shift 11, reduce 5) on ADD
+18: shift/reduce conflict (shift 12, reduce 5) on SUB
+18: shift/reduce conflict (shift 13, reduce 5) on ABS
+state 18
+	exp : exp . ADD exp  (5)
+	exp : exp ADD exp .  (5)
+	exp : exp . SUB factor  (6)
+	exp : exp . ABS factor  (7)
+
+	ADD  shift 11
+	SUB  shift 12
+	ABS  shift 13
+	CP  reduce 5
+	EOL  reduce 5
+
+
+state 19
+	exp : exp SUB factor .  (6)
+	factor : factor . MUL term  (9)
+	factor : factor . DIV term  (10)
+
+	MUL  shift 15
+	DIV  shift 16
+	ADD  reduce 6
+	SUB  reduce 6
+	ABS  reduce 6
+	CP  reduce 6
+	EOL  reduce 6
+
+
+state 20
+	exp : exp ABS factor .  (7)
+	factor : factor . MUL term  (9)
+	factor : factor . DIV term  (10)
+
+	MUL  shift 15
+	DIV  shift 16
+	ADD  reduce 7
+	SUB  reduce 7
+	ABS  reduce 7
+	CP  reduce 7
+	EOL  reduce 7
+
+
+state 21
+	factor : factor MUL term .  (9)
+
+	.  reduce 9
+
+
+state 22
+	factor : factor DIV term .  (10)
+
+	.  reduce 10
+
+
+State 18 contains 3 shift/reduce conflicts.
+
+
+11 terminals, 5 nonterminals
+14 grammar rules, 23 states
