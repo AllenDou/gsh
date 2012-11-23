@@ -1,0 +1,81 @@
+GSH RELEASENOTES:
+
+[v1.8.5]: 20121123.
+	1.v1.8.5 is created for github.
+
+[v1.8.4]: 20121031.
+	[IMPROVED] 1.formula [cache] launched with multi hash & mem-recyle.
+
+[v1.8.3]: 20121026.
+	[IMPROVED] 1.rebuild bc(cal) formula with lex & yacc.
+	[IMPROVED] 2.split clis of fmlaod,bc,carsvm.
+
+[v1.8.2]: 20121025.
+	1.rebuild gsh with dict. formulas and fmnum were abandoned.
+
+[v1.8.1]: 20121025.
+	1. add info of formula loaded.
+	2. load formula cli changed to formula_load.c.
+
+[v1.8]:	20121008.
+	1. remote loading formula is supported, and new formual won't be written into gsh.conf file.
+	2. cli dir is remote loading formula client.
+
+[v1.7.1]: 20121007.
+	etc/gsh.conf.tmp saved, notice shown when formula was loaded successfully.
+
+[v1.7]:	20121004.
+	multi format supported on G41 to SH.
+
+[v1.6.5]: 20120925.
+	change keyword to kw_list table.
+
+[v1.6.4]: 20120924.
+	only formula reserved in etc/gsh.conf file.
+	change so to lib dir.
+
+[v1.6.3]: 20120921.
+	add carsvm formula.
+	.
+	|-- bin
+	|-- etc
+	|-- formula
+	|   |-- cal
+	|   |-- carsvm
+	|   |   |-- <<<data>>>
+	|   |   `-- <<<lib>>>
+	|   `-- sample
+	|-- so
+	`-- src
+	    `-- common
+
+
+[v1.6.2]: 20120920.
+	bugfix: remove formula data like "formula sina test" from gsh.conf automatically.
+
+[v1.6.1]: 20120920.
+	change default function from add to <<gsh_formula_>>test .
+[v1.6]:	20120920.
+	new framework:
+	.
+	|-- bin
+	|-- etc
+	|-- formula
+	|   |-- cal
+	|   `-- sample
+	|-- so
+	`-- src
+	    `-- common
+	generate new model automatically by gen.sh script.
+
+[v1.5]: 20120919.
+	add formula mechanism,only one formula is permited.
+	run init(gsh_formula_init) func automatically.
+
+[v1.4]:
+	add 'info' command.
+
+[v1.3]:
+	add gsh_init function.
+
+
