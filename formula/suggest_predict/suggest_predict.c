@@ -10,7 +10,7 @@
 #define NOTUSED(x)		(void)x
 
 //#define CLS_IP			"10.69.3.72"
-#define CLS_IP			"127.0.0.1"
+#define CLS_IP			"10.69.3.72"
 #define CLS_PORT 		36379
 
 #define JS_GOItem(x,y) 	cJSON_GetObjectItem(x,y)

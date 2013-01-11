@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 		int i;
 		for(i=0;i<100;i++)		
 		{
-				reply = redisCommand(redis_c,"set aaa %s",str);
+				reply = redisCommand(redis_c,"hget suggest_predict %s",str);
 				fprintf(stdout,"%s\r\n",reply->str);
 				freeReplyObject(reply);
 		}
