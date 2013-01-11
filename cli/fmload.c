@@ -5,7 +5,7 @@
 #include <limits.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "hiredis.h"
+#include "lib/hiredis.h"
 #include <sys/stat.h>
 #include <error.h>
 

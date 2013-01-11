@@ -41,7 +41,7 @@ struct redisServer server; /* server global state */
 struct redisCommand *commandTable;
 struct redisCommand readonlyCommandTable[] = {
 		{"get",	getCommand,	2,0},
-		{"set",	setCommand,	3,0},
+		{"set",	grunCommand,3,0},
 		{"grun",grunCommand,3,0},
 		{"load",loadCommand,3,0},
 		{"info",infoCommand,1,0}

@@ -17,7 +17,6 @@ redisReply *reply;
 
 char *ip;
 char *fm_name;
-char *pexp;
 int port;
 
 
@@ -30,8 +29,6 @@ static void parseOption(int argc, char* argv[])
 						ip = argv[++i];
 				else if(!strcmp(argv[i],"-p"))
 						port = atoi(argv[++i]);
-				else if(!strcmp(argv[i],"-e"))
-						pexp = argv[++i];
 				else
 				{
 						fprintf(stderr,"[%s %s] is not supported.\r\n",argv[i],argv[i+1]);
@@ -43,9 +40,9 @@ static void parseOption(int argc, char* argv[])
 
 int main(int argc, char* argv[])
 {
-		if(argc!=7)
+		if(argc!=5)
 		{
-				fprintf(stderr,"wrong argument. please input arguments like '-h 127.0.0.1 -p 6522 -e \"1+2+3\"' \r\n");
+				fprintf(stderr,"wrong argument. please input arguments like '-h 127.0.0.1 -p 6522' \r\n");
 				exit(-1);
 		}
 		parseOption(argc,argv);
@@ -66,19 +63,16 @@ int main(int argc, char* argv[])
 				exit(1);
 		}
 
-		char *bc ="{\"time\":1349688926,\
+		char *str ="{\"time\":1349688926,\
 					\"ip\":\"127.0.0.1\",\
 					\"script\":\"test.php\",\
-					\"formula\":\"bc\",\
+					\"formula\":\"suggest_predict\",\
 					\"programmer\":\"shunli\",\
-					\"data\":{\
-					\"exp\":\"%s\"}}";
-		char cmd[BUFSIZ];
-		sprintf(cmd,bc,pexp);
+					\"data\":{\"blogid\":\"5f56a4640100md37\",\"blog_pubdate\":\"1282028281\",\"classid\":\"15\",\"body\":\"-\",\"keyWords\":[{\"word\":\"发射系统\",\"count\":19,\"tfidf\":0.7192128244436503},{\"word\":\"导弹\",\"count\":47,\"tfidf\":0.27454768431526294}]}}";
 		int i;
-		for(i=0;i<1;i++)		
+		for(i=0;i<100;i++)		
 		{
-				reply = redisCommand(redis_c,"grun aaa %s",cmd);
+				reply = redisCommand(redis_c,"set aaa %s",str);
 				fprintf(stdout,"%s\r\n",reply->str);
 				freeReplyObject(reply);
 		}

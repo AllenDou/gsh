@@ -33,13 +33,13 @@ echo "#include \"$1.h\"
    return 0: failed.
    return 1: success.
    */
-int gsh_formula_$1_init(void *arg,void *ret)
-{
+int gsh_formula_$1_init(void *arg,void *ret){
+
 		return 1;
 }
 
-int gsh_formula_$1_run(void *arg,void *ret)
-{
+int gsh_formula_$1_run(void *arg,void *ret){
+
 		int len = sprintf(ret,\"$1 formula test....\");
 		if( len >= FORMULA_BUFLEN)
 				return 0;
@@ -49,13 +49,34 @@ int gsh_formula_$1_run(void *arg,void *ret)
 
 
 # generate Makefile start. #
-echo "
-all:
-	gcc -Wall -g -rdynamic -ggdb -O0 $1.c -fPIC -shared -o ../../lib/lib$1.so
-clean:
-	rm -rf ../../lib/lib$1.so
-" > Makefile
+#echo "
+#all:
+#	gcc -Wall -g -rdynamic -ggdb -O0 $1.c -fPIC -shared -o ../../lib/lib$1.so
+#clean:
+#	rm -rf ../../lib/lib$1.so
+#" > Makefile
 
+echo "\
+LINKCOLOR=\"\033[34;1m\"
+BINCOLOR=\"\033[37;1m\"
+ENDCOLOR=\"\033[0m\"
+
+CC =gcc
+CFLAGS = -Wall -g3 -rdynamic -ggdb -O0 -fPIC 
+FORMULA=../../lib/lib$1.so
+LINK=-lm -fPIC -shared
+
+QUIET_LINK = @printf ' %b %b\n' \$(LINKCOLOR)LINK\$(ENDCOLOR) \$(BINCOLOR)$@\$(ENDCOLOR);
+
+FORMULA_OBJ= $1.o
+
+all: \$(FORMULA)
+
+\$(FORMULA): \$(FORMULA_OBJ)
+	\$(QUIET_LINK) \$(CC) \$(CFLAGS) -o \$@ $^ \$(LINK)
+clean:
+	\$(RM) \$(FORMULA) *.o
+" > Makefile
 
 # add new formula to conf start #
 cd ../../etc/

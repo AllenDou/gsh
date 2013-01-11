@@ -12,7 +12,10 @@ bind 127.0.0.1
 # syslog-enabled no
 # maxclients 128
 
-formula carsvm 
-formula sample
-formula bc 
-formula cache 
+#formula carsvm 
+#formula sample
+#formula bc 
+#formula cache 
+formula suggest_predict 
+formula test.c 
+formula test 
