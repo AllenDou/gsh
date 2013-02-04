@@ -3,13 +3,14 @@
 #include "lib/cJSON.h"
 
 #include "lib/hiredis.h"
-
+#include "lib/sds.h"
+#include "lib/dict.h"
+#include "lib/zmalloc.h"
 
 
 #define BUFLEN			(64*BUFSIZ)
 #define NOTUSED(x)		(void)x
 
-//#define CLS_IP			"10.69.3.72"
 #define CLS_IP			"10.69.3.72"
 #define CLS_PORT 		36379
 
@@ -31,12 +32,48 @@ typedef struct _cls_{
 }CLS;
 
 CLS g_cls[23];
-
+dict * cls_d[23];
 /*redis*/
 redisContext *redis_cls;	/*36379*/
 redisReply *reply;
 
+sds g_zero;
+
+int dictSdsKeyCompare(void *privdata, const void *key1,
+				const void *key2)
+{
+		int l1,l2;
+		DICT_NOTUSED(privdata);
+
+		l1 = sdslen((sds)key1);
+		l2 = sdslen((sds)key2);
+		if (l1 != l2) return 0;
+		return memcmp(key1, key2, l1) == 0;
+}
+unsigned int dictSdsHash(const void *key) {
+		return dictGenHashFunction((unsigned char*)key, sdslen((char*)key));
+}
+
+dictType keyptrDictType = {
+		dictSdsHash,               /* hash function */
+		NULL,                      /* key dup */
+		NULL,                      /* val dup */
+		dictSdsKeyCompare,         /* key compare */
+		NULL,                      /* key destructor */
+		NULL                       /* val destructor */
+};
+
 void init_vars(void){
+
+		g_zero = sdsnew("0");
+		/*
+		   dict *d = dictCreate(&keyptrDictType,NULL);
+		   sds key = sdsnew("hahaha");
+		   sds key1 = sdsnew("222");
+		   sds val = sdsnew("11111111");
+		   int retval = dictAdd(d,key,val);
+		   dictEntry *de = dictFind(d,key1);
+		   */
 
 		/*init redis_cls-server*/
 		struct timeval timeout = { 1, 500 }; // 1.5 seconds
@@ -62,8 +99,32 @@ void init_vars(void){
 				g_cls[i].n_blog = atoi(reply->str);
 				blog_all += g_cls[i].n_blog;
 				freeReplyObject(reply);
+				cls_d[i] = dictCreate(&keyptrDictType,NULL);
 
 		}
+		return ;
+}
+
+static int cache_hit(int cls, char* keyword ,double * score){
+
+		sds key = sdsnew(keyword);
+		dictEntry *de = dictFind(cls_d[cls],key);
+		sdsfree(key);
+		if(!de) return 0;
+		char *ped = de->val+strlen(de->val);
+		*score = strtod(de->val,&ped);
+		return 1;
+}
+
+static void cache_store(int cls, char *keyword, char* score){
+
+		sds key = sdsnew(keyword);
+		if(score==NULL){
+				dictAdd(cls_d[cls],key,g_zero);	
+				return ;
+		}
+		sds val = sdsnew(score);
+		dictAdd(cls_d[cls],key,val);
 		return ;
 }
 
@@ -100,40 +161,71 @@ double cal(int cls, cJSON* p){
 				count = JS_GOItem(k,"count");
 				word = JS_GOItem(k,"word");
 				tfidf = JS_GOItem(k,"tfidf");
-				reply = redisCommand(redis_cls,"ZSCORE keyword %s",word->valuestring);
-				
-				double PTA;
-				if(reply->type == REDIS_REPLY_STRING){
-						PTA = (double)atoi(reply->str)/g_cls[cls].all;
+
+				double PTA,score;
+
+				if((score=cache_hit(cls, word->valuestring,&score))){
+						PTA = score/g_cls[cls].all;
+				}else{ 
+
+						reply = redisCommand(redis_cls,"ZSCORE keyword %s",word->valuestring);
+
+						if(reply->type == REDIS_REPLY_STRING){
+								PTA = (double)atoi(reply->str)/g_cls[cls].all;
+						}
+						else{
+								PTA = 0;//(double)1/g_cls[cls].all;
+						}
+
+						/*cache store*/
+						cache_store(cls, word->valuestring, reply->str);
+
+						/*free*/
 						freeReplyObject(reply);
 				}
-				else{
-						PTA = 0;//(double)1/g_cls[cls].all;
-						freeReplyObject(reply);
-				}
+
+
 				PT = (double)JS_INT(count)/wc;
 				P += PTA*PA*tfidf->valuedouble/PT;
-
 		}	
 
 		return P;
 }
 
-int predict(int cls ,cJSON* blogid, cJSON* p){
+int predict(int cls ,cJSON* blogid, cJSON* p,char *ret){
 
-		int i,m_cls;
-		double score = 0,max_s = 0;
+		int i,m1_cls,m2_cls,m3_cls;
+		double score = 0,m1_s,m2_s,m3_s;
+
+		m1_cls=m2_cls=m3_cls=0;
+		m1_s=m2_s=m3_s=0;
 
 		for(i = 1;i<sizeof(g_cls)/sizeof(g_cls[0]);i++){
 
 				score = cal(i,p);
-				if(score > max_s){
-						max_s = score;
-						m_cls = i;
+				if(i==18 || i==22)
+						score = (double)0.45*score;
+
+				if(i==6 || i==7)
+						score = (double)0.7*score;
+
+				if(score > m1_s){
+
+						m3_s = m2_s;
+						m3_cls = m2_cls;
+
+						m2_s = m1_s;
+						m2_cls = m1_cls;
+
+						m1_s = score;
+						m1_cls = i;
+
 				}
 
 		}
-		return m_cls;
+
+		int len = sprintf(ret,"%d:%.15f %d:%.15f %d:%.15f",m1_cls,m1_s,m2_cls,m2_s,m3_cls,m3_s);
+		return len;
 }
 
 /*
@@ -148,9 +240,8 @@ int gsh_formula_suggest_predict_init(void *arg,void *ret){
 
 int gsh_formula_suggest_predict_run(void *arg,void *ret){
 
-		
+
 		cJSON *root,*cls,*blogid,*keyword;
-		//if(!(root = cJSON_Parse(p))) continue;
 		root = (cJSON*)arg;
 
 		cls		= JS_GOItem(root,"classid");
@@ -159,12 +250,8 @@ int gsh_formula_suggest_predict_run(void *arg,void *ret){
 
 		if(!(cls && blogid && keyword)) return 0;
 
-		int pre = predict(JS_INT(cls),blogid,keyword);
-	
-		if(!pre) return 0;
+		int len = predict(JS_INT(cls),blogid,keyword,ret);
 
-		int len = sprintf(ret,"%d",pre);
-		
 		if( len >= FORMULA_BUFLEN)
 				return 0;
 		return 1;
