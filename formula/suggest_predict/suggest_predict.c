@@ -164,7 +164,7 @@ double cal(int cls, cJSON* p){
 
 				double PTA,score;
 
-				if((score=cache_hit(cls, word->valuestring,&score))){
+				if(cache_hit(cls, word->valuestring,&score)){
 						PTA = score/g_cls[cls].all;
 				}else{ 
 
