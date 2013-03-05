@@ -164,7 +164,7 @@ double cal(int cls, cJSON* p){
 
 				double PTA,score;
 
-				if(cache_hit(cls, word->valuestring,&score)){
+				if(0 && cache_hit(cls, word->valuestring,&score)){
 						PTA = score/g_cls[cls].all;
 				}else{ 
 
@@ -194,11 +194,16 @@ double cal(int cls, cJSON* p){
 
 int predict(int cls ,cJSON* blogid, cJSON* p,char *ret){
 
-		int i,m1_cls,m2_cls,m3_cls;
-		double score = 0,m1_s,m2_s,m3_s;
+		int i;
+		double score;
 
-		m1_cls=m2_cls=m3_cls=0;
-		m1_s=m2_s=m3_s=0;
+
+		struct _top3_ {
+				int cls;
+				double score;
+		} top3[3];
+
+		memset(top3,0,sizeof(struct _top3_)*3);
 
 		for(i = 1;i<sizeof(g_cls)/sizeof(g_cls[0]);i++){
 
@@ -209,22 +214,28 @@ int predict(int cls ,cJSON* blogid, cJSON* p,char *ret){
 				if(i==6 || i==7)
 						score = (double)0.7*score;
 
-				if(score > m1_s){
+				int k,j;
+				for(k=0;k<3;k++){
 
-						m3_s = m2_s;
-						m3_cls = m2_cls;
+						if(score>=top3[k].score){
 
-						m2_s = m1_s;
-						m2_cls = m1_cls;
+								for(j=1;j>=k;j--){
+										top3[j+1].score = top3[j].score;
+										top3[j+1].cls = top3[j].cls;
+								}
 
-						m1_s = score;
-						m1_cls = i;
-
+								top3[k].score = score;
+								top3[k].cls = i;
+								break;
+						}
 				}
+
 
 		}
 
-		int len = sprintf(ret,"%d:%.15f %d:%.15f %d:%.15f",m1_cls,m1_s,m2_cls,m2_s,m3_cls,m3_s);
+		int len = sprintf(ret,"%d:%.15f %d:%.15f %d:%.15f",top3[0].cls,top3[0].score,\
+						top3[1].cls,top3[1].score,\
+						top3[2].cls,top3[2].score);
 		return len;
 }
 
