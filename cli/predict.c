@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 					\"programmer\":\"shunli\",\
 					\"data\":{\"blogid\":\"5f56a4640100md37\",\"blog_pubdate\":\"1282028281\",\"classid\":\"15\",\"body\":\"-\",\"keyWords\":[{\"word\":\"发射系统\",\"count\":19,\"tfidf\":0.7192128244436503},{\"word\":\"导弹\",\"count\":47,\"tfidf\":0.27454768431526294}]}}";
 		int i;
-		for(i=0;i<100;i++)		
+		for(i=0;i<1;i++)		
 		{
 				reply = redisCommand(redis_c,"hget suggest_predict %s",str);
 				fprintf(stdout,"%s\r\n",reply->str);
