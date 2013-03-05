@@ -118,6 +118,7 @@ static int cache_hit(int cls, char* keyword ,double * score){
 
 static void cache_store(int cls, char *keyword, char* score){
 
+		return ;
 		sds key = sdsnew(keyword);
 		if(score==NULL){
 				dictAdd(cls_d[cls],key,g_zero);	
