@@ -23,16 +23,44 @@
 		cJSON_Delete(x);\
 }while(0)
 
-int dsl = 0;
-unsigned int word_all;
-unsigned int blog_all;
+unsigned int word_all[23];
+unsigned int blog_all[23];
 typedef struct _cls_{
 		unsigned int all;
 		unsigned int n_blog;
 }CLS;
 
-CLS g_cls[23];
-dict * cls_d[23];
+CLS *g_cls[23];
+//dict *cls_d[23];
+
+/*
+ * scope.
+ */
+int g_scope[23] = {0,/*unused.*/
+		0,/*娱乐*/
+		0,/*文化*/
+		0,/*体育*/
+		0,/*情感*/
+		26,/*it*/
+		0,/*财经*/
+		0,/*股票*/
+		0,/*校园*/
+		0,/*教育*/
+		0,/*时尚*/
+		0,/*休闲*/
+		0,/*美食*/
+		0,/*旅游*/
+		0,/*汽车*/
+		0,/*军事*/
+		0,/*房产*/
+		0,/*家居*/
+		0,/*育儿*/
+		0,/*星座*/
+		0,/*健康*/
+		0,/*游戏*/
+		0/*杂谈*/
+};
+
 /*redis*/
 redisContext *redis_cls;	/*36379*/
 redisReply *reply;
@@ -65,6 +93,12 @@ dictType keyptrDictType = {
 
 void init_vars(void){
 
+		int i;
+		for(i = 1;i<23;i++){
+				g_cls[i] = (CLS*) malloc(sizeof(CLS)*g_scope[i]);
+		}
+
+
 		g_zero = sdsnew("0");
 		/*
 		   dict *d = dictCreate(&keyptrDictType,NULL);
@@ -83,56 +117,65 @@ void init_vars(void){
 				exit(1);
 		}
 
-		int i;
-		word_all = 0;
-		for(i = 1;i<sizeof(g_cls)/sizeof(g_cls[0]);i++){
+		int j;
+		for(i = 1;i<23;i++){
 
-				reply = redisCommand(redis_cls,"SELECT %d",i);
-				freeReplyObject(reply);
+				word_all[i] = 0;
+				blog_all[i] = 0;
+				for(j = 1;j<= g_scope[i];j++){
+						reply = redisCommand(redis_cls,"SELECT %d",i*10000+j);
+						freeReplyObject(reply);
 
-				reply = redisCommand(redis_cls,"GET all");
-				g_cls[i].all = atoi(reply->str); 
-				word_all += g_cls[i].all;
-				freeReplyObject(reply);
+						reply = redisCommand(redis_cls,"GET all");
+						if(reply->type == REDIS_REPLY_STRING ){
+								g_cls[i][j].all = atoi(reply->str); 
+								word_all[i] += g_cls[i][j].all;
+						}
+						freeReplyObject(reply);
 
-				reply = redisCommand(redis_cls,"GET n_blog");
-				g_cls[i].n_blog = atoi(reply->str);
-				blog_all += g_cls[i].n_blog;
-				freeReplyObject(reply);
-				cls_d[i] = dictCreate(&keyptrDictType,NULL);
+						reply = redisCommand(redis_cls,"GET n_blog");
+						if(reply->type == REDIS_REPLY_STRING ){
+								g_cls[i][j].n_blog = atoi(reply->str);
+								blog_all[i] += g_cls[i][j].n_blog;
+						}
+						freeReplyObject(reply);
+						//cls_d[i] = dictCreate(&keyptrDictType,NULL);
+				}
 
 		}
 		return ;
 }
 
-static int cache_hit(int cls, char* keyword ,double * score){
+/*
+   static int cache_hit(int cls, char* keyword ,double * score){
 
-		sds key = sdsnew(keyword);
-		dictEntry *de = dictFind(cls_d[cls],key);
-		sdsfree(key);
-		if(!de) return 0;
-		char *ped = de->val+strlen(de->val);
-		*score = strtod(de->val,&ped);
-		return 1;
-}
+   sds key = sdsnew(keyword);
+   dictEntry *de = dictFind(cls_d[cls],key);
+   sdsfree(key);
+   if(!de) return 0;
+   char *ped = de->val+strlen(de->val);
+ *score = strtod(de->val,&ped);
+ return 1;
+ }
 
-static void cache_store(int cls, char *keyword, char* score){
+ static void cache_store(int cls, char *keyword, char* score){
 
-		sds key = sdsnew(keyword);
-		if(score==NULL){
-				dictAdd(cls_d[cls],key,g_zero);	
-				return ;
-		}
-		sds val = sdsnew(score);
-		dictAdd(cls_d[cls],key,val);
-		return ;
-}
+ sds key = sdsnew(keyword);
+ if(score==NULL){
+ dictAdd(cls_d[cls],key,g_zero);	
+ return ;
+ }
+ sds val = sdsnew(score);
+ dictAdd(cls_d[cls],key,val);
+ return ;
+ }
+ */
 
-double cal(int cls, cJSON* p){
+double cal(int bcls, int scls, cJSON* p){
 
-		if(cls < 1 || cls > 128) return 0;
+		//if(cls < 1 || cls > 230000) return 0;
 
-		reply = redisCommand(redis_cls,"SELECT %d",cls);
+		reply = redisCommand(redis_cls,"SELECT %d",bcls*10000+scls);
 		freeReplyObject(reply);
 
 		double PA = 0.000001;
@@ -141,7 +184,7 @@ double cal(int cls, cJSON* p){
 		int i,size = JS_GAS(p);
 		cJSON *count,*word,*tfidf,*k;
 
-		PA =(double)g_cls[cls].n_blog/blog_all;
+		PA =(double)g_cls[bcls][scls].n_blog/blog_all[bcls];
 
 		/*calculate all count in this blogid.*/
 		int wc=0;
@@ -164,21 +207,21 @@ double cal(int cls, cJSON* p){
 
 				double PTA,score;
 
-				if(cache_hit(cls, word->valuestring,&score)){
-						PTA = score/g_cls[cls].all;
+				if(0 /*cache_hit(cls, word->valuestring,&score)*/){
+						PTA = score/g_cls[bcls][scls].all;
 				}else{ 
 
 						reply = redisCommand(redis_cls,"ZSCORE keyword %s",word->valuestring);
 
 						if(reply->type == REDIS_REPLY_STRING){
-								PTA = (double)atoi(reply->str)/g_cls[cls].all;
+								PTA = (double)atoi(reply->str)/g_cls[bcls][scls].all;
 						}
 						else{
 								PTA = 0;//(double)1/g_cls[cls].all;
 						}
 
 						/*cache store*/
-						cache_store(cls, word->valuestring, reply->str);
+						//cache_store(cls, word->valuestring, reply->str);
 
 						/*free*/
 						freeReplyObject(reply);
@@ -192,7 +235,7 @@ double cal(int cls, cJSON* p){
 		return P;
 }
 
-int predict(int cls ,cJSON* blogid, cJSON* p,char *ret){
+int predict(int bcls ,cJSON* blogid, cJSON* p,char *ret){
 
 		int i;
 		double score;
@@ -205,14 +248,15 @@ int predict(int cls ,cJSON* blogid, cJSON* p,char *ret){
 
 		memset(top3,0,sizeof(struct _top3_)*3);
 
-		for(i = 1;i<sizeof(g_cls)/sizeof(g_cls[0]);i++){
+		for(i = 1 ;i <= g_scope[bcls]; i++){
 
-				score = cal(i,p);
-				if(i==18 || i==22)
-						score = (double)0.45*score;
+				score = cal(bcls,i,p);
 
-				if(i==6 || i==7)
-						score = (double)0.7*score;
+				/*if(i==18 || i==22)
+				  score = (double)0.45*score;
+
+				  if(i==6 || i==7)
+				  score = (double)0.7*score;*/
 
 				int k,j;
 				for(k=0;k<3;k++){
@@ -252,16 +296,16 @@ int gsh_formula_suggest_predict_init(void *arg,void *ret){
 int gsh_formula_suggest_predict_run(void *arg,void *ret){
 
 
-		cJSON *root,*cls,*blogid,*keyword;
+		cJSON *root,*bcls,*blogid,*keyword;
 		root = (cJSON*)arg;
 
-		cls		= JS_GOItem(root,"classid");
+		bcls	= JS_GOItem(root,"classid");
 		keyword	= JS_GOItem(root,"keyWords");
 		blogid	= JS_GOItem(root,"blogid");
 
-		if(!(cls && blogid && keyword)) return 0;
+		if(!(bcls && blogid && keyword)) return 0;
 
-		int len = predict(JS_INT(cls),blogid,keyword,ret);
+		int len = predict(JS_INT(bcls),blogid,keyword,ret);
 
 		if( len >= FORMULA_BUFLEN)
 				return 0;
