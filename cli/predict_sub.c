@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 		char *str ="{\"time\":1349688926,\
 					\"ip\":\"127.0.0.1\",\
 					\"script\":\"test.php\",\
-					\"formula\":\"suggest_predict\",\
+					\"formula\":\"suggest_predict_sub\",\
 					\"programmer\":\"shunli\",\
 					\"data\":{\"blogid\":\"5f56a4640100md37\",\"blog_pubdate\":\"1282028281\",\"classid\":\"5\",\"body\":\"-\",\"keyWords\":[{\"word\":\"安全\",\"count\":19,\"tfidf\":0.7192128244436503},{\"word\":\"防火墙\",\"count\":47,\"tfidf\":0.27454768431526294}]}}";
 		int i;
