@@ -6,11 +6,11 @@ CC=gcc
 CFLAGS= -Wall -g -rdynamic -ggdb -O0 -fPIC 
 LINK=-lm -fPIC -shared -ldl
 
-FORMULA=../../lib/libsuggest_predict.so
+FORMULA=../../lib/libsuggest_predict_sub.so
 QUIET_LINK = @printf ' %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR);
 
 SHARE_OBJ=lib/cJSON.o lib/hiredis.o lib/net.o lib/sds.o
-FORMULA_OBJ=suggest_predict.o $(SHARE_OBJ)
+FORMULA_OBJ=suggest_predict_sub.o $(SHARE_OBJ)
 
 all:$(FORMULA)
 

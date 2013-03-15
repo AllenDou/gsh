@@ -1,4 +1,4 @@
-#include "suggest_predict.h"
+#include "suggest_predict_sub.h"
 #include <math.h>
 #include "lib/cJSON.h"
 
@@ -287,13 +287,13 @@ int predict(int bcls ,cJSON* blogid, cJSON* p,char *ret){
    return 0: failed.
    return 1: success.
    */
-int gsh_formula_suggest_predict_init(void *arg,void *ret){
+int gsh_formula_suggest_predict_sub_init(void *arg,void *ret){
 
 		init_vars();
 		return 1;
 }
 
-int gsh_formula_suggest_predict_run(void *arg,void *ret){
+int gsh_formula_suggest_predict_sub_run(void *arg,void *ret){
 
 
 		cJSON *root,*bcls,*blogid,*keyword;
