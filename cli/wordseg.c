@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 					\"programmer\":\"shunli\",\
 					\"data\":{\"text\":\"我爱北京,天安门,天安门上太阳升.\"}}";
 		int i;
-		for(i=0;i<100000;i++)		
+		for(i=0;i<1;i++)		
 		{
 				reply = redisCommand(redis_c,"hget iask_wordseg %s",str);
 				fprintf(stdout,"%s\r\n",reply->str);

@@ -111,13 +111,15 @@ int gsh_formula_iask_wordseg_run(void *arg,void *ret){
 				WORD_ITEM *wd = wordseg->list[i].word;
 
 				{
-						cJSON *obj,*cjwd,*attr,*idf;
+						cJSON *obj,*cjwd,*attr,*pos,*idf;
 						obj = cJSON_CreateObject();
 						cjwd = cJSON_CreateString(word);
 						attr = cJSON_CreateNumber(wd->postagid);
+						pos = cJSON_CreateNumber(wd->wordPos);
 						idf = cJSON_CreateNumber(wd->idf);
 
 						cJSON_AddItemToObject(obj,"word",cjwd);
+						cJSON_AddItemToObject(obj,"pos",pos);
 						cJSON_AddItemToObject(obj,"attr",attr);
 						cJSON_AddItemToObject(obj,"idf",idf);
 						cJSON_AddItemToArray(array,obj);

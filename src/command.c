@@ -118,7 +118,7 @@ void grunCommand(redisClient *c)
 		/*find formula_func from server.fms(dict)*/
 		sds s= sdsnew(formula->valuestring);
 
-		if(sdscmp(s,"iask_wordseg")){
+		if(!strcmp(s,"iask_wordseg")){
 				gsh_formula_iask_wordseg_run(data,fm_buf);		
 				addReplyBulkCString(c,fm_buf);
 				cJSON_Delete(root);
