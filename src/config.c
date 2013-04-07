@@ -61,9 +61,9 @@ void loadServerConfig(char *filename) {
 						server.bindaddr = zstrdup(argv[1]);
 				} else if (!strcasecmp(argv[0],"formula") && argc == 2) {
 						void *val = loadfm(argv[1]);
-						if(!val) goto loaderr;
-						int retval = dictAdd(server.fms, sdsnew(argv[1]), val);
-						if(retval != DICT_OK) goto loaderr;
+						//if(!val) goto loaderr;
+						//int retval = dictAdd(server.fms, sdsnew(argv[1]), val);
+						//if(retval != DICT_OK) goto loaderr;
 				} else if (!strcasecmp(argv[0],"dir") && argc == 2) {
 						if (chdir(argv[1]) == -1) {
 								redisLog(REDIS_WARNING,"Can't chdir to '%s': %s",

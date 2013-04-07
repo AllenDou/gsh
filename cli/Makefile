@@ -7,6 +7,7 @@ CFLAGS=-Wall -g -O0
 LINK= -ldl -lm
 bin = bin
 
+WORDSEG=wordseg
 PREDICT=cli_predict
 CACHE=cli_cache
 FMLOAD=cli_fmload
@@ -16,14 +17,17 @@ QUIET_LINK = @printf ' %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCO
 
 SHARE_OBJ=lib/cJSON.o lib/hiredis.o lib/net.o lib/sds.o
 
+WORDSEG_OBJ=wordseg.o $(SHARE_OBJ)
 PREDICT_OBJ=predict.o $(SHARE_OBJ)
 CACHE_OBJ=cache.o $(SHARE_OBJ)
 FMLOAD_OBJ=fmload.o $(SHARE_OBJ)
 CARSVM_OBJ=carsvm.o $(SHARE_OBJ)
 BC_OBJ=bc.o  $(SHARE_OBJ)
 
-all:$(PREDICT) $(FMLOAD) $(CARSVM) $(BC)
+all:$(PREDICT) $(FMLOAD) $(CARSVM) $(BC) $(WORDSEG)
 
+$(WORDSEG):$(WORDSEG_OBJ)
+	$(QUIET_LINK) $(CC) $(CFLAGS) -o bin/$@ $^ $(LINK)
 $(PREDICT):$(PREDICT_OBJ)
 	$(QUIET_LINK) $(CC) $(CFLAGS) -o bin/$@ $^ $(LINK)
 $(FMLOAD):$(FMLOAD_OBJ)

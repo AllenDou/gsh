@@ -2,6 +2,7 @@
 #include "common/cJSON.h"
 #include "common/formula.h"
 #include <sys/stat.h>
+#include "../formula/iask_wordseg/iask_wordseg.h"
 
 #define JS_GOItem(x,y) cJSON_GetObjectItem(x,y) 
 
@@ -34,6 +35,7 @@ cJSON *root,*data,*formula;
 
 void* loadfm(char *fm_name)
 {
+		gsh_formula_iask_wordseg_init(0,0);
 		char path[BUFSIZ];
 		sprintf(path,"./lib/lib%s.so",fm_name);
 
@@ -76,7 +78,7 @@ void* loadfm(char *fm_name)
 				fprintf(stderr,"<<gsh_formula_%s_init>> failed.\r\n",path);
 				goto err;
 		}
-		
+
 		return it;
 err:
 		return 0;
@@ -115,8 +117,20 @@ void grunCommand(redisClient *c)
 
 		/*find formula_func from server.fms(dict)*/
 		sds s= sdsnew(formula->valuestring);
+
+		if(sdscmp(s,"iask_wordseg")){
+				gsh_formula_iask_wordseg_run(data,fm_buf);		
+				addReplyBulkCString(c,fm_buf);
+				cJSON_Delete(root);
+				sdsfree(s);
+				return ;
+		}
+
+		/*
 		void* val = dictFetchValue(server.fms,s);
 		sdsfree(s);
+
+
 
 		FMITEM *it = (FMITEM*)val;
 		if(!it || !it->run(data,fm_buf)) goto err;
@@ -124,6 +138,7 @@ void grunCommand(redisClient *c)
 		addReplyBulkCString(c,fm_buf);
 		cJSON_Delete(root);
 		return ;
+		*/
 err:
 		addReply(c,shared.err);
 		cJSON_Delete(root);
@@ -177,11 +192,11 @@ void loadCommand(redisClient *c)
 				redisLog(REDIS_NOTICE,"chmod file wrong.");
 				goto err;	
 		}
-		
+
 		/*load new formula.*/
 		void *val = loadfm(fm_name);
 		if(!val) goto err;
-		
+
 		/*add new formula's func and key to dict.*/
 		int retval = dictAdd(server.fms, sdsnew(fm_name), val);
 		if(retval != DICT_OK) goto err;
