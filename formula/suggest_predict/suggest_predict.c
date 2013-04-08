@@ -132,8 +132,6 @@ double cal(int cls, cJSON* p){
 
 		if(cls < 1 || cls > 128) return 0;
 
-		reply = redisCommand(redis_cls,"SELECT %d",cls);
-		freeReplyObject(reply);
 
 		double PA = 0.000001;
 		double PT = 1;
@@ -154,6 +152,8 @@ double cal(int cls, cJSON* p){
 
 		}
 
+		int chdb = 0;
+
 		/*calculate every word's score.*/	
 		for(i = 0 ; i < size ; i++ ){
 
@@ -166,7 +166,14 @@ double cal(int cls, cJSON* p){
 
 				if(cache_hit(cls, word->valuestring,&score)){
 						PTA = score/g_cls[cls].all;
-				}else{ 
+				}else{
+						
+						/*miss cache: then select redis's db & getting data.*/
+						if(chdb == 0){
+								reply = redisCommand(redis_cls,"SELECT %d",cls);
+								freeReplyObject(reply);
+								chdb = 1;
+						}
 
 						reply = redisCommand(redis_cls,"ZSCORE keyword %s",word->valuestring);
 
