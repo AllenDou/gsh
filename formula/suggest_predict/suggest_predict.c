@@ -162,6 +162,8 @@ double cal(int cls, cJSON* p){
 				word = JS_GOItem(k,"word");
 				tfidf = JS_GOItem(k,"tfidf");
 
+				if(!count || !word || !tfidf) return 0;
+
 				double PTA,score;
 
 				if(cache_hit(cls, word->valuestring,&score)){
