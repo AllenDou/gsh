@@ -14,6 +14,8 @@
 #define CLS_IP			"10.69.3.72"
 #define CLS_PORT 		36379
 
+#define NCLASS			24
+
 #define JS_GOItem(x,y) 	cJSON_GetObjectItem(x,y)
 #define JS_GAS(x) 		cJSON_GetArraySize(x)
 #define JS_GAI(x,y)		cJSON_GetArrayItem(x,y)
@@ -31,8 +33,8 @@ typedef struct _cls_{
 		unsigned int n_blog;
 }CLS;
 
-CLS g_cls[23];
-dict * cls_d[23];
+CLS g_cls[NCLASS+1];
+dict * cls_d[NCLASS+1];
 /*redis*/
 redisContext *redis_cls;	/*36379*/
 redisReply *reply;
