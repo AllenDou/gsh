@@ -14,6 +14,8 @@
 #define CLS_IP			"10.69.3.72"
 #define CLS_PORT 		36379
 
+#define NCLASS			24
+
 #define JS_GOItem(x,y) 	cJSON_GetObjectItem(x,y)
 #define JS_GAS(x) 		cJSON_GetArraySize(x)
 #define JS_GAI(x,y)		cJSON_GetArrayItem(x,y)
@@ -31,8 +33,8 @@ typedef struct _cls_{
 		unsigned int n_blog;
 }CLS;
 
-CLS g_cls[23];
-dict * cls_d[23];
+CLS g_cls[NCLASS+1];
+dict * cls_d[NCLASS+1];
 /*redis*/
 redisContext *redis_cls;	/*36379*/
 redisReply *reply;
@@ -133,8 +135,6 @@ double cal(int cls, cJSON* p){
 
 		if(cls < 1 || cls > 128) return 0;
 
-		reply = redisCommand(redis_cls,"SELECT %d",cls);
-		freeReplyObject(reply);
 
 		double PA = 0.000001;
 		double PT = 1;
@@ -155,6 +155,8 @@ double cal(int cls, cJSON* p){
 
 		}
 
+		int chdb = 0;
+
 		/*calculate every word's score.*/	
 		for(i = 0 ; i < size ; i++ ){
 
@@ -163,11 +165,20 @@ double cal(int cls, cJSON* p){
 				word = JS_GOItem(k,"word");
 				tfidf = JS_GOItem(k,"tfidf");
 
+				if(!count || !word || !tfidf) return 0;
+
 				double PTA,score;
 
 				if( 0 && cache_hit(cls, word->valuestring,&score)){
 						PTA = score/g_cls[cls].all;
-				}else{ 
+				}else{
+						
+						/*miss cache: then select redis's db & getting data.*/
+						if(chdb == 0){
+								reply = redisCommand(redis_cls,"SELECT %d",cls);
+								freeReplyObject(reply);
+								chdb = 1;
+						}
 
 						reply = redisCommand(redis_cls,"ZSCORE keyword %s",word->valuestring);
 
