@@ -7,11 +7,11 @@ CFLAGS=-Wall -g -O0
 LINK= -ldl -lm
 bin = bin
 
-PREDICT=cli_predict
-CACHE=cli_cache
-FMLOAD=cli_fmload
-CARSVM=cli_carsvm
-BC=cli_bc
+PREDICT=predict
+CACHE=cache
+FMLOAD=fmload
+CARSVM=carsvm
+BC=bc
 QUIET_LINK = @printf ' %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR);
 
 SHARE_OBJ=lib/cJSON.o lib/hiredis.o lib/net.o lib/sds.o
