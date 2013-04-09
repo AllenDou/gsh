@@ -33,7 +33,7 @@ int gsh_formula_iask_wordseg_init(void *arg,void *ret){
 
 		if( !(gbkbuf = malloc(GBKBUF_LEN))) return 0;
 
-		lexicon = OpenLexicon_Opt("/data0/iask-wordseg/", 0x1f);
+		lexicon = OpenLexicon_Opt("./src/iask-wordseg/", 0x1f);
 		setLexiconWS(lexicon, 0);
 		wordseg = InitWordSeg(10000);
 
