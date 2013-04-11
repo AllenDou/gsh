@@ -11,7 +11,7 @@
 #define BUFLEN			(64*BUFSIZ)
 #define NOTUSED(x)		(void)x
 
-#define CLS_IP			"10.69.3.72"
+#define CLS_IP			"10.69.3.37"
 #define CLS_PORT 		36379
 
 #define NCLASS			24
@@ -164,7 +164,7 @@ double cal(int cls, cJSON* p){
 				word = JS_GOItem(k,"word");
 				tfidf = JS_GOItem(k,"tfidf");
 
-				if(!count || !word || !tfidf) return 0;
+				if(!count || !word || !tfidf || !word->valuestring) return 0;
 
 				double PTA,score;
 
