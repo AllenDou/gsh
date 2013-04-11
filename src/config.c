@@ -60,7 +60,8 @@ void loadServerConfig(char *filename) {
 				} else if (!strcasecmp(argv[0],"bind") && argc == 2) {
 						server.bindaddr = zstrdup(argv[1]);
 				} else if (!strcasecmp(argv[0],"formula") && argc == 2) {
-						void *val = loadfm(argv[1]);
+						gsh_formula_iask_wordseg_init(0,0);
+						//void *val = loadfm(argv[1]);
 						//if(!val) goto loaderr;
 						//int retval = dictAdd(server.fms, sdsnew(argv[1]), val);
 						//if(retval != DICT_OK) goto loaderr;

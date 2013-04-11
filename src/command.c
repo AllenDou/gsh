@@ -35,7 +35,6 @@ cJSON *root,*data,*formula;
 
 void* loadfm(char *fm_name)
 {
-		gsh_formula_iask_wordseg_init(0,0);
 		char path[BUFSIZ];
 		sprintf(path,"./lib/lib%s.so",fm_name);
 
