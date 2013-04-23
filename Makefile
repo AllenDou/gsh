@@ -9,5 +9,4 @@ clean:
 	cd src && $(MAKE) $@
 	cd cli && $(MAKE) $@
 	cd formula && $(MAKE) $@
-	find . -name nohup.out |xargs rm -rf
 	rm -rf lib/*
