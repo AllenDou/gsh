@@ -12,6 +12,7 @@ CACHE=cli_cache
 FMLOAD=cli_fmload
 CARSVM=cli_carsvm
 BC=cli_bc
+TAG=tag
 QUIET_LINK = @printf ' %b %b\n' $(LINKCOLOR)LINK$(ENDCOLOR) $(BINCOLOR)$@$(ENDCOLOR);
 
 SHARE_OBJ=lib/cJSON.o lib/hiredis.o lib/net.o lib/sds.o
@@ -20,10 +21,14 @@ PREDICT_OBJ=predict.o $(SHARE_OBJ)
 CACHE_OBJ=cache.o $(SHARE_OBJ)
 FMLOAD_OBJ=fmload.o $(SHARE_OBJ)
 CARSVM_OBJ=carsvm.o $(SHARE_OBJ)
-BC_OBJ=bc.o  $(SHARE_OBJ)
+BC_OBJ=bc.o $(SHARE_OBJ)
+TAG_OBJ=tag.o $(SHARE_OBJ)
 
-all:$(PREDICT) $(FMLOAD) $(CARSVM) $(BC)
+all:$(PREDICT) $(FMLOAD) $(CARSVM) $(BC) $(TAG)
 
+
+$(TAG):$(TAG_OBJ)
+	$(QUIET_LINK) $(CC) $(CFLAGS) -o bin/$@ $^ $(LINK)
 $(PREDICT):$(PREDICT_OBJ)
 	$(QUIET_LINK) $(CC) $(CFLAGS) -o bin/$@ $^ $(LINK)
 $(FMLOAD):$(FMLOAD_OBJ)

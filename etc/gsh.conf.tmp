@@ -17,5 +17,4 @@ bind 127.0.0.1
 #formula bc 
 #formula cache 
 formula suggest_predict 
-formula test.c 
-formula test 
+formula blog_tag 
